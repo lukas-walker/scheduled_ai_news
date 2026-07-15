@@ -11,7 +11,8 @@ judgment call and keep going.
 On every run, do the following in order:
 
 1. Read `SOURCES.md` — tab-separated columns `Name / Type / Topic focus /
-   URL`. This is the full list of sources to check.
+   URL / Feed URL`. Feed URL is blank when no feed is known. This is the
+   full list of sources to check.
 2. Read the daily files already in `daily_news/` from the last 7 calendar
    days (fewer if the project is younger) to see what has already been
    reported.
@@ -28,6 +29,27 @@ On every run, do the following in order:
    those items — see Output format below.
 7. Commit the new file and push to `origin/main` before finishing. A run
    that doesn't end in a push is incomplete.
+
+## Fetch strategy
+
+Many of these sites block or rate-limit plain scraping even when the content
+is public. To get a real hit rate, follow this order for each source:
+
+1. If `SOURCES.md` lists a Feed URL for that source, fetch the feed first —
+   RSS/Atom feeds are far less likely to be blocked than the HTML page, even
+   when the page itself 403s.
+2. Otherwise fetch the page URL directly.
+3. If a source's Type is marked `search-only` (currently Instagram and
+   LinkedIn personal-profile sources — both block non-browser fetches by
+   design), skip direct fetching entirely and go straight to step 4.
+4. If the direct fetch/feed fails (403, timeout, bot-block, DNS failure) or
+   the source is search-only, fall back to a `site:<domain>` web search for
+   recent activity before concluding there's nothing new.
+5. Only after all of the above log it under `## Issues`, and say specifically
+   *why* it failed (dead domain, wrong URL, blocked, no recent post found) —
+   that detail is what lets the URL get fixed later. If the URL itself looks
+   wrong or dead (not just blocked), say so explicitly so `SOURCES.md` can be
+   corrected.
 
 ## Deduplication rule
 
@@ -57,13 +79,32 @@ containing just the `## Issues` section — never skip the commit/push step.
 
 File path: `daily_news/YYYY-MM-DD.md`
 
+Group items under whichever of these categories apply that day (skip any
+category with nothing in it that day, and keep the category order below so
+the file reads the same way every morning). If an item spans more than one
+category, put it under the single best fit rather than duplicating it.
+
 ```markdown
 # AI News — YYYY-MM-DD
 
+## Frontier Models
 - **<Short topic title>** — up to 3 sentences with the most important
   takeaway. [Source](https://...)
-- **<Short topic title>** — up to 3 sentences with the most important
-  takeaway. [Source](https://...)
+
+## Science & Research
+- **<Short topic title>** — up to 3 sentences. [Source](https://...)
+
+## Software Engineering
+- **<Short topic title>** — up to 3 sentences. [Source](https://...)
+
+## Ethics
+- **<Short topic title>** — up to 3 sentences. [Source](https://...)
+
+## Switzerland
+- **<Short topic title>** — up to 3 sentences. [Source](https://...)
+
+## Geopolitics & Security Policy
+- **<Short topic title>** — up to 3 sentences. [Source](https://...)
 
 ## Issues
 - <Source name>: <why it couldn't be checked>
